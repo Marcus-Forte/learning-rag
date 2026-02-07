@@ -1,0 +1,588 @@
+{
+  "configuration" : { },
+  "description" : "Description",
+  "documentation" : { },
+  "id" : 1,
+  "lastModifiedAgent" : "structurizr-ui",
+  "lastModifiedDate" : "2026-02-07T12:49:19Z",
+  "model" : {
+    "people" : [ {
+      "id" : "1",
+      "name" : "User",
+      "properties" : {
+        "structurizr.dsl.identifier" : "u"
+      },
+      "relationships" : [ {
+        "description" : "prompts",
+        "destinationId" : "8",
+        "id" : "28",
+        "sourceId" : "1",
+        "tags" : "Relationship"
+      }, {
+        "description" : "prompts",
+        "destinationId" : "7",
+        "id" : "29",
+        "linkedRelationshipId" : "28",
+        "sourceId" : "1"
+      }, {
+        "description" : "prompts",
+        "destinationId" : "5",
+        "id" : "30",
+        "linkedRelationshipId" : "28",
+        "sourceId" : "1"
+      } ],
+      "tags" : "Element,Person"
+    } ],
+    "softwareSystems" : [ {
+      "containers" : [ {
+        "documentation" : { },
+        "id" : "3",
+        "name" : "Chat API",
+        "properties" : {
+          "structurizr.dsl.identifier" : "llm.c_api"
+        },
+        "tags" : "Element,Container"
+      }, {
+        "documentation" : { },
+        "id" : "4",
+        "name" : "Embeddings API",
+        "properties" : {
+          "structurizr.dsl.identifier" : "llm.e_api"
+        },
+        "tags" : "Element,Container"
+      } ],
+      "description" : "Large Language Model API (e.g OpenAI, Anthropic, etc.)",
+      "documentation" : { },
+      "id" : "2",
+      "name" : "LLM",
+      "properties" : {
+        "structurizr.dsl.identifier" : "llm"
+      },
+      "tags" : "Element,Software System"
+    }, {
+      "containers" : [ {
+        "documentation" : { },
+        "id" : "6",
+        "name" : "Vector Database",
+        "properties" : {
+          "structurizr.dsl.identifier" : "ss.vb"
+        },
+        "tags" : "Element,Container,Database",
+        "technology" : "Qdrant, ..."
+      }, {
+        "components" : [ {
+          "documentation" : {
+            "sections" : [ {
+              "format" : "Markdown",
+              "order" : 1,
+              "title" : ""
+            } ]
+          },
+          "id" : "8",
+          "name" : "Command Line Interface",
+          "properties" : {
+            "structurizr.dsl.identifier" : "ss.app.cli"
+          },
+          "relationships" : [ {
+            "description" : "stores",
+            "destinationId" : "10",
+            "id" : "14",
+            "sourceId" : "8",
+            "tags" : "Relationship"
+          }, {
+            "description" : "uses",
+            "destinationId" : "9",
+            "id" : "15",
+            "sourceId" : "8",
+            "tags" : "Relationship"
+          } ],
+          "tags" : "Element,Component"
+        }, {
+          "documentation" : {
+            "sections" : [ {
+              "format" : "Markdown",
+              "order" : 1,
+              "title" : ""
+            } ]
+          },
+          "id" : "9",
+          "name" : "LLM Interface",
+          "properties" : {
+            "structurizr.dsl.identifier" : "ss.app.illm"
+          },
+          "relationships" : [ {
+            "description" : "retrieves",
+            "destinationId" : "11",
+            "id" : "13",
+            "sourceId" : "9",
+            "tags" : "Relationship"
+          }, {
+            "description" : "prompts / responses",
+            "destinationId" : "3",
+            "id" : "16",
+            "sourceId" : "9",
+            "tags" : "Relationship"
+          }, {
+            "description" : "prompts / responses",
+            "destinationId" : "2",
+            "id" : "17",
+            "linkedRelationshipId" : "16",
+            "sourceId" : "9"
+          } ],
+          "tags" : "Element,Component"
+        }, {
+          "documentation" : {
+            "sections" : [ {
+              "content" : "The ingestion module is an interface that represents the ingestion of a document.\n\n## Expected implementations\n\n- PDFIngestion\n- WordIngestion\n- WebIngestion\n- ...\n\n## Expected API\n\n- store(document)",
+              "format" : "Markdown",
+              "order" : 1,
+              "title" : ""
+            } ]
+          },
+          "id" : "10",
+          "name" : "Data Ingestion",
+          "properties" : {
+            "structurizr.dsl.identifier" : "ss.app.ing"
+          },
+          "relationships" : [ {
+            "description" : "stores",
+            "destinationId" : "11",
+            "id" : "12",
+            "sourceId" : "10",
+            "tags" : "Relationship"
+          }, {
+            "description" : "embeddings",
+            "destinationId" : "4",
+            "id" : "22",
+            "sourceId" : "10",
+            "tags" : "Relationship"
+          }, {
+            "description" : "embeddings",
+            "destinationId" : "2",
+            "id" : "23",
+            "linkedRelationshipId" : "22",
+            "sourceId" : "10"
+          } ],
+          "tags" : "Element,Component"
+        }, {
+          "documentation" : { },
+          "id" : "11",
+          "name" : "Vector Database Interface",
+          "properties" : {
+            "structurizr.dsl.identifier" : "ss.app.idb"
+          },
+          "relationships" : [ {
+            "description" : "stores / retrieves",
+            "destinationId" : "6",
+            "id" : "26",
+            "sourceId" : "11",
+            "tags" : "Relationship"
+          } ],
+          "tags" : "Element,Component"
+        } ],
+        "documentation" : { },
+        "id" : "7",
+        "name" : "Application",
+        "properties" : {
+          "structurizr.dsl.identifier" : "ss.app"
+        },
+        "relationships" : [ {
+          "description" : "prompts / responses",
+          "destinationId" : "3",
+          "id" : "18",
+          "linkedRelationshipId" : "16",
+          "sourceId" : "7"
+        }, {
+          "description" : "prompts / responses",
+          "destinationId" : "2",
+          "id" : "19",
+          "linkedRelationshipId" : "16",
+          "sourceId" : "7"
+        }, {
+          "description" : "embeddings",
+          "destinationId" : "4",
+          "id" : "24",
+          "linkedRelationshipId" : "22",
+          "sourceId" : "7"
+        }, {
+          "description" : "stores / retrieves",
+          "destinationId" : "6",
+          "id" : "27",
+          "linkedRelationshipId" : "26",
+          "sourceId" : "7"
+        } ],
+        "tags" : "Element,Container",
+        "technology" : "Python+Langchain"
+      } ],
+      "documentation" : { },
+      "id" : "5",
+      "name" : "RAG System",
+      "properties" : {
+        "structurizr.dsl.identifier" : "ss"
+      },
+      "relationships" : [ {
+        "description" : "prompts / responses",
+        "destinationId" : "3",
+        "id" : "20",
+        "linkedRelationshipId" : "16",
+        "sourceId" : "5"
+      }, {
+        "description" : "prompts / responses",
+        "destinationId" : "2",
+        "id" : "21",
+        "linkedRelationshipId" : "16",
+        "sourceId" : "5"
+      }, {
+        "description" : "embeddings",
+        "destinationId" : "4",
+        "id" : "25",
+        "linkedRelationshipId" : "22",
+        "sourceId" : "5"
+      } ],
+      "tags" : "Element,Software System"
+    } ]
+  },
+  "name" : "Name",
+  "properties" : {
+    "structurizr.inspection.info" : "0",
+    "structurizr.inspection.ignore" : "0",
+    "structurizr.inspection.error" : "44",
+    "structurizr.inspection.warning" : "0"
+  },
+  "views" : {
+    "componentViews" : [ {
+      "automaticLayout" : {
+        "applied" : true,
+        "edgeSeparation" : 0,
+        "implementation" : "Graphviz",
+        "nodeSeparation" : 300,
+        "rankDirection" : "LeftRight",
+        "rankSeparation" : 300,
+        "vertices" : false
+      },
+      "containerId" : "7",
+      "dimensions" : {
+        "height" : 1952,
+        "width" : 3820
+      },
+      "elements" : [ {
+        "id" : "1",
+        "x" : 200,
+        "y" : 449
+      }, {
+        "id" : "2",
+        "x" : 2400,
+        "y" : 1411
+      }, {
+        "id" : "6",
+        "x" : 3150,
+        "y" : 499
+      }, {
+        "id" : "8",
+        "x" : 900,
+        "y" : 499
+      }, {
+        "id" : "9",
+        "x" : 1650,
+        "y" : 199
+      }, {
+        "id" : "10",
+        "x" : 1650,
+        "y" : 799
+      }, {
+        "id" : "11",
+        "x" : 2400,
+        "y" : 499
+      } ],
+      "externalContainerBoundariesVisible" : false,
+      "key" : "app_component",
+      "name" : "Component View: RAG System - Application",
+      "order" : 4,
+      "relationships" : [ {
+        "id" : "12"
+      }, {
+        "id" : "13"
+      }, {
+        "id" : "14"
+      }, {
+        "id" : "15"
+      }, {
+        "id" : "17",
+        "vertices" : [ {
+          "x" : 2100,
+          "y" : 649
+        }, {
+          "x" : 2400,
+          "y" : 1278
+        } ]
+      }, {
+        "id" : "23"
+      }, {
+        "id" : "26"
+      }, {
+        "id" : "28"
+      } ]
+    } ],
+    "configuration" : {
+      "branding" : { },
+      "lastSavedView" : "app_component",
+      "metadataSymbols" : "SquareBrackets",
+      "styles" : {
+        "elements" : [ {
+          "background" : "#1168bd",
+          "shape" : "Component",
+          "tag" : "Component"
+        }, {
+          "background" : "#036374",
+          "shape" : "Cylinder",
+          "tag" : "Database"
+        }, {
+          "background" : "#08427b",
+          "shape" : "RoundedBox",
+          "stroke" : "#ffffff",
+          "tag" : "Element"
+        }, {
+          "shape" : "Person",
+          "tag" : "Person"
+        }, {
+          "background" : "#1168bd",
+          "tag" : "Software System"
+        } ]
+      },
+      "terminology" : { }
+    },
+    "containerViews" : [ {
+      "automaticLayout" : {
+        "applied" : false,
+        "edgeSeparation" : 0,
+        "implementation" : "Graphviz",
+        "nodeSeparation" : 300,
+        "rankDirection" : "LeftRight",
+        "rankSeparation" : 300,
+        "vertices" : false
+      },
+      "elements" : [ {
+        "id" : "3",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "4",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "5",
+        "x" : 0,
+        "y" : 0
+      } ],
+      "externalSoftwareSystemBoundariesVisible" : false,
+      "generatedKey" : true,
+      "key" : "Container-001",
+      "name" : "Container View: LLM",
+      "order" : 2,
+      "relationships" : [ {
+        "id" : "20"
+      }, {
+        "id" : "25"
+      } ],
+      "softwareSystemId" : "2"
+    }, {
+      "automaticLayout" : {
+        "applied" : false,
+        "edgeSeparation" : 0,
+        "implementation" : "Graphviz",
+        "nodeSeparation" : 300,
+        "rankDirection" : "LeftRight",
+        "rankSeparation" : 300,
+        "vertices" : false
+      },
+      "elements" : [ {
+        "id" : "1",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "2",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "6",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "7",
+        "x" : 0,
+        "y" : 0
+      } ],
+      "externalSoftwareSystemBoundariesVisible" : false,
+      "key" : "rag",
+      "name" : "Container View: RAG System",
+      "order" : 3,
+      "relationships" : [ {
+        "id" : "19"
+      }, {
+        "id" : "27"
+      }, {
+        "id" : "29"
+      } ],
+      "softwareSystemId" : "5"
+    } ],
+    "dynamicViews" : [ {
+      "automaticLayout" : {
+        "applied" : false,
+        "edgeSeparation" : 0,
+        "implementation" : "Graphviz",
+        "nodeSeparation" : 300,
+        "rankDirection" : "LeftRight",
+        "rankSeparation" : 300,
+        "vertices" : false
+      },
+      "elementId" : "7",
+      "elements" : [ {
+        "id" : "1",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "4",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "8",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "10",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "11",
+        "x" : 0,
+        "y" : 0
+      } ],
+      "externalBoundariesVisible" : false,
+      "key" : "app_store",
+      "name" : "Dynamic View: RAG System - Application",
+      "order" : 5,
+      "relationships" : [ {
+        "description" : "stores",
+        "id" : "28",
+        "order" : "1",
+        "response" : false
+      }, {
+        "description" : "uses",
+        "id" : "14",
+        "order" : "2",
+        "response" : false
+      }, {
+        "description" : "embeddings",
+        "id" : "22",
+        "order" : "3",
+        "response" : false
+      }, {
+        "description" : "stores",
+        "id" : "12",
+        "order" : "4",
+        "response" : false
+      } ]
+    }, {
+      "automaticLayout" : {
+        "applied" : false,
+        "edgeSeparation" : 0,
+        "implementation" : "Graphviz",
+        "nodeSeparation" : 300,
+        "rankDirection" : "LeftRight",
+        "rankSeparation" : 300,
+        "vertices" : false
+      },
+      "elementId" : "7",
+      "elements" : [ {
+        "id" : "1",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "3",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "6",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "8",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "9",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "11",
+        "x" : 0,
+        "y" : 0
+      } ],
+      "externalBoundariesVisible" : false,
+      "key" : "app_prompt",
+      "name" : "Dynamic View: RAG System - Application",
+      "order" : 6,
+      "relationships" : [ {
+        "description" : "prompts",
+        "id" : "28",
+        "order" : "1",
+        "response" : false
+      }, {
+        "description" : "prompts",
+        "id" : "15",
+        "order" : "2",
+        "response" : false
+      }, {
+        "description" : "prompts / responses",
+        "id" : "16",
+        "order" : "3",
+        "response" : false
+      }, {
+        "description" : "retrieves",
+        "id" : "13",
+        "order" : "4",
+        "response" : false
+      }, {
+        "description" : "retrieves",
+        "id" : "26",
+        "order" : "5",
+        "response" : false
+      } ]
+    } ],
+    "systemContextViews" : [ {
+      "automaticLayout" : {
+        "applied" : false,
+        "edgeSeparation" : 0,
+        "implementation" : "Graphviz",
+        "nodeSeparation" : 300,
+        "rankDirection" : "LeftRight",
+        "rankSeparation" : 300,
+        "vertices" : false
+      },
+      "elements" : [ {
+        "id" : "1",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "2",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "5",
+        "x" : 0,
+        "y" : 0
+      } ],
+      "enterpriseBoundaryVisible" : true,
+      "generatedKey" : true,
+      "key" : "SystemContext-001",
+      "name" : "System Context View: RAG System",
+      "order" : 1,
+      "relationships" : [ {
+        "id" : "21"
+      }, {
+        "id" : "30"
+      } ],
+      "softwareSystemId" : "5"
+    } ]
+  }
+}
