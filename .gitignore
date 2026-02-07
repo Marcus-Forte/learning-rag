@@ -1,2 +1,6 @@
 .structurizr
 .venv
+__pycache__/
+qdrant_data/
+test_docs/
+.env
