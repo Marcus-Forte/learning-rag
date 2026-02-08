@@ -1,8 +1,4 @@
-from __future__ import annotations
-
 import logging
-import os
-from pathlib import Path
 
 from langchain_core.embeddings import Embeddings
 from langchain_qdrant import QdrantVectorStore
@@ -24,7 +20,7 @@ class VectorDB:
     def __init__(
         self,
         *,
-        collection_name: str = "documents",
+        collection_name: str,
         embeddings: Embeddings,
         host: str = "qdrant",
         port: int = 6333,
@@ -59,16 +55,10 @@ class VectorDB:
     # Internals
     # ------------------------------------------------------------------
 
-    def _create_client(
-        self,
-        *,
-        host: str,
-        port: int   
-    ) -> QdrantClient:
+    def _create_client(self, *, host: str, port: int) -> QdrantClient:
         if host:
             log.info("Connecting to Qdrant via host=%s port=%s", host, port)
             return QdrantClient(host=host, port=port)
-
 
     def _ensure_collection_exists(self) -> None:
         """Create the collection if it doesn't exist.

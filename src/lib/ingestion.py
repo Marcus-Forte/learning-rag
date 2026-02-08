@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from abc import ABC, abstractmethod
 from pathlib import Path
 
@@ -16,4 +14,3 @@ class Ingestion(ABC):
     def load(self, document: str | Path) -> list[Document]:
         """Load a document and return a list of LangChain Documents."""
         ...
-

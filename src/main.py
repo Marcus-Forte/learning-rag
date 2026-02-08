@@ -1,85 +1,20 @@
-from __future__ import annotations
-
+import argparse
 import logging
 import os
-import sys
-from typing import Any
 
 from dotenv import load_dotenv
 
-from langchain_core.documents import Document as LCDocument
-from langchain_core.messages import AIMessageChunk, HumanMessage, SystemMessage
 from langchain_openai import ChatOpenAI
 from langchain_openai import OpenAIEmbeddings
 
-from lib.cli import parse_args
+from lib.chat import (
+    interactive_chat,
+    print_sources,
+    stream_rag_agent_answer,
+    stream_rag_answer,
+)
 from lib.ingestion_pdf import PDFIngestion
 from lib.vector_db import VectorDB
-
-
-def _format_docs(docs: list[LCDocument]) -> str:
-    return "\n\n".join(d.page_content for d in docs)
-
-
-def _get_message_text(message) -> str:
-    text = getattr(message, "text", None)
-    if isinstance(text, str) and text:
-        return text
-    content = getattr(message, "content", "")
-    return content if isinstance(content, str) else str(content)
-
-
-def _stream_rag_answer(*, llm: Any, retriever: Any, prompt: str) -> None:
-    # Dynamic prompt concept (per LangChain RAG docs): retrieve right before calling
-    # the model and inject context into a system message.
-    context_docs = retriever.invoke(prompt)
-    docs_content = _format_docs(context_docs)
-    system_prompt = (
-        "You are a helpful assistant. Answer using ONLY the following context. "
-        "If the context is insufficient, say you don't know."
-        f"\n\n{docs_content}"
-    )
-
-    print("Answer:")
-    wrote_any = False
-    last_text = ""
-
-    messages = [SystemMessage(content=system_prompt), HumanMessage(content=prompt)]
-    for chunk in llm.stream(messages):
-        if isinstance(chunk, AIMessageChunk):
-            text = _get_message_text(chunk)
-        else:
-            text = _get_message_text(chunk)
-
-        if not text:
-            continue
-        wrote_any = True
-
-        # Defensive: some models return cumulative text.
-        if text.startswith(last_text):
-            delta = text[len(last_text) :]
-        else:
-            delta = text
-        if delta:
-            sys.stdout.write(delta)
-            sys.stdout.flush()
-            last_text = text
-
-    if wrote_any and not last_text.endswith("\n"):
-        print()
-
-
-def _print_sources(*, vector_store: Any, query: str, k: int) -> None:
-    results = vector_store.similarity_search_with_score(query, k=k)
-    if results:
-        print("\nSources:")
-        for i, (doc, score) in enumerate(results, start=1):
-            meta = doc.metadata or {}
-            src = meta.get("source", "?")
-            page = meta.get("page", "?")
-            print(f"[{i}] score={float(score):.4f} source={src} page={page}")
-    else:
-        print("\nSources:\n(no matches)")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -87,12 +22,57 @@ def main(argv: list[str] | None = None) -> int:
         level=logging.INFO,
         format="%(asctime)s %(levelname)s [%(name)s] %(message)s",
     )
+
+    parser = argparse.ArgumentParser(
+        prog="learning-rag",
+        description="Minimal RAG playground (store PDFs, query via retrieval).",
+    )
+
+    action = parser.add_mutually_exclusive_group(required=True)
+    action.add_argument(
+        "--store",
+        metavar="PDF_PATH",
+        help="Store a PDF into the local vector DB.",
+    )
+    action.add_argument(
+        "--prompt",
+        dest="prompt",
+        metavar="TEXT",
+        help="One-shot prompt (retrieval only).",
+    )
+    action.add_argument(
+        "--interactive",
+        action="store_true",
+        help="Interactive chat loop (multi-turn RAG).",
+    )
+    action.add_argument(
+        "--search-only",
+        dest="search_only",
+        metavar="QUERY",
+        help="Search the vector DB directly (similarity search only; no LLM).",
+    )
+
+    parser.add_argument(
+        "--top-k",
+        type=int,
+        default=5,
+        help="How many chunks to retrieve for a prompt.",
+    )
+    parser.add_argument(
+        "--agent",
+        action="store_true",
+        help="Use agentic RAG (tool-based retrieval) instead of two-step RAG.",
+    )
+
+    logging.getLogger("httpx").setLevel(logging.WARNING)
+
     load_dotenv()
 
-    args = parse_args(argv)
+    args = parser.parse_args(argv)
 
     collection_name = os.getenv("QDRANT_COLLECTION", "documents")
     embedding_model = os.getenv("OPENAI_EMBEDDING_MODEL", "text-embedding-3-small")
+    llm_model = os.getenv("OPENAI_CHAT_MODEL", "gpt-5-nano")
     embeddings = OpenAIEmbeddings(model=embedding_model)
 
     vector_db = VectorDB(
@@ -109,15 +89,50 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Stored {len(lc_docs)} chunks into collection '{collection_name}'.")
         return 0
 
+    if args.interactive:
+        retriever = vector_db.as_retriever(k=args.top_k)
+        llm = ChatOpenAI(model=llm_model, streaming=True)
+        interactive_chat(
+            llm=llm,
+            retriever=retriever,
+            vector_store=vector_store,
+            k=args.top_k,
+            agent_mode=args.agent,
+        )
+        return 0
+
+    if getattr(args, "search_only", None):
+        query = args.search_only
+        results = vector_store.similarity_search_with_score(query, k=args.top_k)
+        if results:
+            print("Results:")
+            for i, (doc, score) in enumerate(results, start=1):
+                meta = doc.metadata or {}
+                src = meta.get("source", "?")
+                page = meta.get("page", "?")
+                content = (doc.page_content or "").strip().replace("\n", " ")
+                preview = content[:300] + ("..." if len(content) > 300 else "")
+                print(f"[{i}] score={float(score):.4f} source={src} page={page}")
+                if preview:
+                    print(f"    {preview}")
+        else:
+            print("Results:\n(no matches)")
+        return 0
+
     prompt = args.prompt
     retriever = vector_db.as_retriever(k=args.top_k)
-    llm = ChatOpenAI(model="gpt-5-nano", streaming=True)
+    llm = ChatOpenAI(model=llm_model, streaming=True)
 
-    _stream_rag_answer(llm=llm, retriever=retriever, prompt=prompt)
-    _print_sources(vector_store=vector_store, query=prompt, k=args.top_k)
+    if args.agent:
+        stream_rag_agent_answer(
+            llm=llm, vector_store=vector_store, prompt=prompt, k=args.top_k
+        )
+    else:
+        stream_rag_answer(llm=llm, retriever=retriever, prompt=prompt)
+    print_sources(vector_store=vector_store, query=prompt, k=args.top_k)
 
     return 0
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    main()

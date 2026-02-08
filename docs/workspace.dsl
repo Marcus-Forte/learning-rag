@@ -25,7 +25,7 @@ workspace {
                     !docs cli.md
                 }
 
-                illm = component "LLM Interface" {
+                chat = component "Chat+RAG" {
                     !docs illm.md
                 }
 
@@ -33,18 +33,19 @@ workspace {
                     !docs ing.md
                 }
 
-                idb = component "Vector Database Interface" {
+                idb = component "Vector DB Wrapper" {
+                    !docs ivb.md
                 }
 
                 ing -> idb "stores"
-                illm -> idb "retrieves"
+                chat -> idb "stores / retrieves"
                 cli -> ing "stores"
-                cli -> illm "uses"
+                cli -> chat "prompts"
 
             }
 
-            app.illm -> llm.c_api "prompts / responses"
-            app.ing -> llm.e_api "embeddings"
+            app.chat -> llm.c_api "prompts / responses"
+            app.idb -> llm.e_api "embeddings"
             app.idb -> vb "stores / retrieves"
         }
 
@@ -75,17 +76,28 @@ workspace {
         dynamic ss.app "app_store" {
             u -> ss.app.cli "stores"
             ss.app.cli -> ss.app.ing "uses"
-            ss.app.ing -> llm.e_api "embeddings"
             ss.app.ing -> ss.app.idb "stores"
+            ss.app.idb -> llm.e_api "embeddings"
             autolayout lr
         }
 
         dynamic ss.app "app_prompt" {
             u -> ss.app.cli "prompts"
-            ss.app.cli -> ss.app.illm "prompts"
-            ss.app.illm -> llm.c_api "prompts / responses"
-            ss.app.illm -> ss.app.idb "retrieves"
+            ss.app.cli -> ss.app.chat "prompts"
+            ss.app.chat -> ss.app.idb "retrieves"
             ss.app.idb -> ss.vb "retrieves"
+            ss.app.chat -> llm.c_api "prompts / responses"
+            ss.app.idb -> llm.e_api "embeddings"
+            autolayout lr
+        }
+
+        dynamic ss.app "app_agent_prompt" {
+            u -> ss.app.cli "prompts (agent mode)"
+            ss.app.cli -> ss.app.chat "prompts"
+            ss.app.chat -> ss.app.idb "retrieves (tool call)"
+            ss.app.chat -> llm.c_api "prompts / responses"
+            ss.app.idb -> ss.vb "retrieves"
+            ss.app.idb -> llm.e_api "embeddings"
             autolayout lr
         }
 
