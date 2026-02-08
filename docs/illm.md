@@ -1,8 +1,6 @@
 ## LLM / Chat
 
-This project no longer has a custom “LLM interface” abstraction.
-
-Instead it uses LangChain directly:
+This module consumes the langchain LLM interface library to interact with OpenAI chat and embedding models. 
 
 - Chat model: `langchain_openai.ChatOpenAI`
 - Embeddings: `langchain_openai.OpenAIEmbeddings`
@@ -14,20 +12,12 @@ The chat/RAG orchestration lives in `src/lib/chat.py`.
 There are two prompt-time RAG implementations:
 
 1) **Two-step RAG** (default)
-	- Retrieve relevant chunks first
-	- Inject them into a system prompt
-	- Call the model once
+	- User prompt -> prompts gets embedded -> vector DB chunks are retrieved -> entire context is passed to the LLM (model is called once) -> LLM processes and replies.  
 
 2) **Agentic RAG** (`--agent`)
 	- Exposes retrieval as a tool (`retrieve_context`)
 	- Uses `langchain.agents.create_agent` so the model can decide when/how to retrieve
 
-### Streaming + token logging
+### Resources
 
-- Both modes stream output to stdout.
-- Token usage is logged using LangChain’s OpenAI callback (when available):
-  - `OpenAI tokens prompt=... completion=... total=...`
-
-### Tool-call logging (agent mode)
-
-Tool-call sequence logging is not enabled by default.
+- [RAG Langchain](https://docs.langchain.com/oss/python/langchain/rag)

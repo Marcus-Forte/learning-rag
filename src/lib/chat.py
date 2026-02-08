@@ -15,7 +15,7 @@ log = logging.getLogger(__name__)
 
 def print_sources(*, vector_store: VectorStore, query: str, k: int) -> None:
     results = vector_store.similarity_search_with_score(query, k=k)
-    log.info("Printing sources for query: `%s`", query)
+    print(f"Printing sources for query: `{query}`")
     if results:
         print("\nSources:")
         for i, (doc, score) in enumerate(results, start=1):

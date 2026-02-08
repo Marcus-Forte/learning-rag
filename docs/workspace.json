@@ -3,7 +3,7 @@
   "description" : "Description",
   "documentation" : { },
   "id" : 1,
-  "lastModifiedDate" : "2026-02-08T13:23:09Z",
+  "lastModifiedDate" : "2026-02-08T20:32:50Z",
   "model" : {
     "people" : [ {
       "id" : "1",
@@ -100,7 +100,7 @@
         }, {
           "documentation" : {
             "sections" : [ {
-              "content" : "## LLM / Chat\n\nThis project no longer has a custom “LLM interface” abstraction.\n\nInstead it uses LangChain directly:\n\n- Chat model: `langchain_openai.ChatOpenAI`\n- Embeddings: `langchain_openai.OpenAIEmbeddings`\n\nThe chat/RAG orchestration lives in `src/lib/chat.py`.\n\n### RAG modes\n\nThere are two prompt-time RAG implementations:\n\n1) **Two-step RAG** (default)\n\t- Retrieve relevant chunks first\n\t- Inject them into a system prompt\n\t- Call the model once\n\n2) **Agentic RAG** (`--agent`)\n\t- Exposes retrieval as a tool (`retrieve_context`)\n\t- Uses `langchain.agents.create_agent` so the model can decide when/how to retrieve\n\n### Streaming + token logging\n\n- Both modes stream output to stdout.\n- Token usage is logged using LangChain’s OpenAI callback (when available):\n  - `OpenAI tokens prompt=... completion=... total=...`\n\n### Tool-call logging (agent mode)\n\nTool-call sequence logging is not enabled by default.\n",
+              "content" : "## LLM / Chat\n\nThis module consumes the langchain LLM interface library to interact with OpenAI chat and embedding models. \n\n- Chat model: `langchain_openai.ChatOpenAI`\n- Embeddings: `langchain_openai.OpenAIEmbeddings`\n\nThe chat/RAG orchestration lives in `src/lib/chat.py`.\n\n### RAG modes\n\nThere are two prompt-time RAG implementations:\n\n1) **Two-step RAG** (default)\n\t- User prompt -> prompts gets embedded -> vector DB chunks are retrieved -> entire context is passed to the LLM (model is called once) -> LLM processes and replies.  \n\n2) **Agentic RAG** (`--agent`)\n\t- Exposes retrieval as a tool (`retrieve_context`)\n\t- Uses `langchain.agents.create_agent` so the model can decide when/how to retrieve\n\n### Resources\n\n- [RAG Langchain](https://docs.langchain.com/oss/python/langchain/rag)\n",
               "format" : "Markdown",
               "order" : 1,
               "title" : ""
@@ -441,6 +441,10 @@
         "x" : 0,
         "y" : 0
       }, {
+        "id" : "6",
+        "x" : 0,
+        "y" : 0
+      }, {
         "id" : "8",
         "x" : 0,
         "y" : 0
@@ -476,6 +480,11 @@
         "description" : "embeddings",
         "id" : "22",
         "order" : "4",
+        "response" : false
+      }, {
+        "description" : "stores",
+        "id" : "26",
+        "order" : "5",
         "response" : false
       } ]
     }, {

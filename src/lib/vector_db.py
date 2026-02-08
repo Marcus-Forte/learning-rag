@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 from langchain_core.embeddings import Embeddings
 from langchain_qdrant import QdrantVectorStore
@@ -50,6 +51,75 @@ class VectorDB:
 
     def as_retriever(self, *, k: int = 5):
         return self.vector_store.as_retriever(search_kwargs={"k": k})
+
+    @staticmethod
+    def list_sources(
+        *,
+        vector_store: QdrantVectorStore,
+        max_points: int = 5000,
+        batch_size: int = 256,
+        max_sources: int = 500,
+    ) -> list[str]:
+        """List unique document sources stored in the vector DB.
+
+        Works best with `langchain_qdrant.QdrantVectorStore` (expects `client` and
+        `collection_name` attrs). Returns a list of lines like:
+        `source (chunks=N)`.
+        """
+
+        client = getattr(vector_store, "client", None)
+        collection_name = getattr(vector_store, "collection_name", None)
+        if client is None or collection_name is None:
+            return [
+                "Listing all sources is not supported by the current vector store. "
+                "Try retrieval instead (retrieve_context)."
+            ]
+
+        counts: dict[str, int] = {}
+        scanned = 0
+        offset = None
+
+        while scanned < max_points and len(counts) < max_sources:
+            limit = min(batch_size, max_points - scanned)
+            points, offset = client.scroll(
+                collection_name=collection_name,
+                limit=limit,
+                offset=offset,
+                with_payload=True,
+                with_vectors=False,
+            )
+            if not points:
+                break
+
+            for point in points:
+                scanned += 1
+                payload = getattr(point, "payload", None) or {}
+
+                meta = payload.get("metadata") or payload.get("meta") or {}
+                source = meta.get("source") or payload.get("source")
+                if not source:
+                    continue
+                source_str = str(source)
+                counts[source_str] = counts.get(source_str, 0) + 1
+
+                if scanned >= max_points or len(counts) >= max_sources:
+                    break
+
+            if offset is None:
+                break
+
+        if not counts:
+            return ["No sources found (or unable to read source metadata)."]
+
+        lines = [
+            f"{src} (chunks={cnt})"
+            for src, cnt in sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))
+        ]
+        if scanned >= max_points:
+            lines.append(f"(stopped after scanning {scanned} points)")
+        if len(counts) >= max_sources:
+            lines.append(f"(stopped after collecting {len(counts)} sources)")
+        return lines
 
     # ------------------------------------------------------------------
     # Internals

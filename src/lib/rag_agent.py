@@ -8,6 +8,7 @@ from langchain.agents import create_agent
 from langchain.tools import tool
 
 from lib.callbacks import ToolCallLoggingCallbackHandler
+from lib.vector_db import VectorDB
 
 log = logging.getLogger(__name__)
 
@@ -121,8 +122,16 @@ def stream_rag_agent_answer(
         )
         return serialized, retrieved_docs
 
+    @tool
+    def list_sources() -> list[str]:
+        """List unique document sources available in the RAG knowledge base."""
+
+        return VectorDB.list_sources(vector_store=vector_store)
+
     agent = create_agent(
-        llm, tools=[retrieve_context], system_prompt=AGENTIC_RAG_SYSTEM_PROMPT
+        llm,
+        tools=[retrieve_context, list_sources],
+        system_prompt=AGENTIC_RAG_SYSTEM_PROMPT,
     )
     messages: list[Any] = []
     if history:

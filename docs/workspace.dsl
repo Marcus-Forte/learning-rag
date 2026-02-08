@@ -78,6 +78,7 @@ workspace {
             ss.app.cli -> ss.app.ing "uses"
             ss.app.ing -> ss.app.idb "stores"
             ss.app.idb -> llm.e_api "embeddings"
+            ss.app.idb -> ss.vb "stores"
             autolayout lr
         }
 
